@@ -37,6 +37,9 @@ def is_token_valid():
     except:
         return False
 
+# Extract request_token from URL
+query_params = st.query_params
+request_token = query_params.get("request_token")
 
 # --- REDIRECT SERVER HANDLER ---
 def start_redirect_server():
@@ -45,7 +48,7 @@ def start_redirect_server():
             parsed = urllib.parse.urlparse(self.path)
             params = urllib.parse.parse_qs(parsed.query)
             if "request_token" in params:
-                request_token = params["request_token"][0]
+                # request_token = params["request_token"][0]
                 try:
                     data = kite.generate_session(request_token, api_secret=api_secret)
                     access_token = data["access_token"]
