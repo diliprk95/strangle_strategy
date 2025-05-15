@@ -10,8 +10,17 @@ import webbrowser
 
 load_dotenv()
 
-api_key = st.secrets["ZERODHA_API_KEY"]
-api_secret = st.secrets["ZERODHA_API_SECRET"]
+def get_secret(key):
+    try:
+        # Try Streamlit secrets (Cloud)
+        return st.secrets[key]
+    except Exception:
+        # Fallback to local .env or YAML config
+        return os.getenv(key)
+
+api_key = get_secret("ZERODHA_API_KEY")
+api_secret = get_secret("ZERODHA_API_SECRET")
+
 redirect_uri = "http://localhost:8000"
 
 kite = KiteConnect(api_key=api_key)

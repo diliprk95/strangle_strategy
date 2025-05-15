@@ -11,9 +11,18 @@ def load_config():
         return yaml.safe_load(f)
 
 config = load_config()
-api_key = st.secrets["ZERODHA_API_KEY"]
-api_secret = st.secrets["ZERODHA_API_SECRET"]
-access_token_path = os.getenv("ZERODHA_ACCESS_TOKEN")
+
+def get_secret(key):
+    try:
+        # Try Streamlit secrets (Cloud)
+        return st.secrets[key]
+    except Exception:
+        # Fallback to local .env or YAML config
+        return os.getenv(key)
+
+api_key = get_secret("ZERODHA_API_KEY")
+api_secret = get_secret("ZERODHA_API_SECRET")
+access_token_path = get_secret("ZERODHA_ACCESS_TOKEN")
 
 kite = KiteConnect(api_key=api_key)
 
