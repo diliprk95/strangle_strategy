@@ -1,0 +1,19 @@
+scheduler:
+  interval_minutes: 2
+strategy:
+  entry_day: Friday
+  entry_time: '10:30'
+  exit_day: Monday
+  exit_time: '14:30'
+  instrument: NIFTY
+  lot_size: 50
+  order_enabled: true
+  quantity: 25
+  strike_distance: 300
+  strike_offset: 300
+  symbol: NIFTY
+zerodha:
+  access_token: your_access_token
+  api_key: 86tdmpsxmrb81nq2
+  api_secret: y1xjsg8od6hoo8gpaj9xau9jmusk2ec6
+  user_id: your_user_id

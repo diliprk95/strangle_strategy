@@ -1,0 +1,81 @@
+[
+  {
+    "status": "WAIT",
+    "message": "Waiting for strategy time window. Current: Wednesday 21:09",
+    "buy_ce": "NIFTY22-May-2025C24950",
+    "buy_pe": "NIFTY22-May-2025P24350",
+    "ltp": 24666.9,
+    "timestamp": "2025-05-14 21:09:30"
+  },
+  {
+    "status": "WAIT",
+    "message": "Waiting for strategy time window. Current: Wednesday 21:09",
+    "buy_ce": "NIFTY22-May-2025C24950",
+    "buy_pe": "NIFTY22-May-2025P24350",
+    "ltp": 24666.9,
+    "timestamp": "2025-05-14 21:09:18"
+  },
+  {
+    "status": "WAIT",
+    "message": "Waiting for strategy time window. Current: Wednesday 19:26",
+    "buy_ce": "NIFTY22-May-2025C24950",
+    "buy_pe": "NIFTY22-May-2025P24350",
+    "ltp": 24666.9,
+    "timestamp": "2025-05-14 19:26:48"
+  },
+  {
+    "status": "WAIT",
+    "message": "Waiting for strategy time window. Current: Wednesday 19:26",
+    "buy_ce": "NIFTY22-May-2025C24950",
+    "buy_pe": "NIFTY22-May-2025P24350",
+    "ltp": 24666.9,
+    "timestamp": "2025-05-14 19:26:21"
+  },
+  {
+    "status": "WAIT",
+    "message": "Waiting for strategy time window. Current: Wednesday 19:26",
+    "buy_ce": "NIFTY22-May-2025C24950",
+    "buy_pe": "NIFTY22-May-2025P24350",
+    "ltp": 24666.9,
+    "timestamp": "2025-05-14 19:26:18"
+  },
+  {
+    "status": "WAIT",
+    "message": "Waiting for strategy time window. Current: Tuesday 13:57",
+    "timestamp": "2025-05-13 13:57:55"
+  },
+  {
+    "status": "WAIT",
+    "message": "Waiting for strategy time window. Current: {today} {current_time}",
+    "buy_ce": "NIFTY22-May-2025C24900",
+    "buy_pe": "NIFTY22-May-2025P24300",
+    "ltp": 24578.35,
+    "timestamp": "2025-05-13 13:57:55"
+  },
+  {
+    "status": "WAIT",
+    "message": "Waiting for strategy time window. Current: Tuesday 13:57",
+    "timestamp": "2025-05-13 13:57:24"
+  },
+  {
+    "status": "WAIT",
+    "message": "Waiting for strategy time window. Current: {today} {current_time}",
+    "buy_ce": "NIFTY22-May-2025C24900",
+    "buy_pe": "NIFTY22-May-2025P24300",
+    "ltp": 24578.35,
+    "timestamp": "2025-05-13 13:57:24"
+  },
+  {
+    "status": "WAIT",
+    "message": "Waiting for strategy time window. Current: Tuesday 13:57",
+    "timestamp": "2025-05-13 13:57:21"
+  },
+  {
+    "status": "WAIT",
+    "message": "Waiting for strategy time window. Current: {today} {current_time}",
+    "buy_ce": "NIFTY22-May-2025C24900",
+    "buy_pe": "NIFTY22-May-2025P24300",
+    "ltp": 24578.35,
+    "timestamp": "2025-05-13 13:57:22"
+  }
+]

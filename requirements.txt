@@ -1,0 +1,4 @@
+kiteconnect
+PyYAML
+schedule
+python-dotenv
