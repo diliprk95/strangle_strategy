@@ -81,11 +81,15 @@ elif st.session_state.is_logged_in:
 
 else:
     st.warning("⚠️ You are not logged in to Zerodha.")
+    login_url = kite.login_url()
+    is_local = os.getenv("IS_LOCAL", "0") == "1"
 
-    if st.button("🔑 Login to Zerodha"):
-        login_url = kite.login_url()
-        # st.markdown(f"[Click here to login to Zerodha]({login_url})", unsafe_allow_html=True)
-        webbrowser.open_new_tab(login_url)
+    if is_local:
+        if st.button("🔑 Login to Zerodha"):
+            webbrowser.open_new_tab(login_url)
+            st.info("Opened Zerodha login page in a new tab. You'll be redirected back here with access.")
+    else:
+        st.link_button("🔑 Login to Zerodha", login_url)
         st.info("You'll be redirected back here with access.")
 
     # --- LOCALHOST REDIRECT FLOW (FOR LOCAL DEV ONLY) ---
