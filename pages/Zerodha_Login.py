@@ -53,7 +53,7 @@ if "is_logged_in" not in st.session_state:
 query_params = st.query_params
 request_token = query_params.get("request_token")
 
-if request_token:
+if request_token and "callback" in query_params:
     try:
         data = kite.generate_session(request_token, api_secret=api_secret)
         access_token = data["access_token"]
@@ -63,11 +63,13 @@ if request_token:
             f.write(access_token)
 
         st.session_state.is_logged_in = True
-        st.success("✅ Login successful!")
-        st.experimental_set_query_params()  # Clear query params
+        st.markdown("### ✅ Login successful! You can close this tab.")
+        st.stop()
+        st.query_params  # Clear query params
         st.page_link("pages/Strategy_Run.py", label="➡️ Go to Dashboard")
     except Exception as e:
         st.error(f"Token exchange failed: {e}")
+        st.stop()
 
 elif st.session_state.is_logged_in:
     st.success("✅ Already authenticated.")
@@ -89,8 +91,10 @@ else:
             webbrowser.open_new_tab(login_url)
             st.info("Opened Zerodha login page in a new tab. You'll be redirected back here with access.")
     else:
-        st.link_button("🔑 Login to Zerodha", login_url)
-        st.info("You'll be redirected back here with access.")
+       login_url = kite.login_url()
+       login_url_with_callback = login_url + "&callback=1"
+       st.link_button("🔑 Login to Zerodha", login_url_with_callback)
+       st.info("You'll be redirected back here with access.")
 
     # --- LOCALHOST REDIRECT FLOW (FOR LOCAL DEV ONLY) ---
     # """
