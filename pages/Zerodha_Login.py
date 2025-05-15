@@ -13,9 +13,9 @@ import streamlit as st
 with open("config/settings.yaml", "r") as f:
     config = yaml.safe_load(f)
 
-api_key = os.getenv("ZERODHA_API_KEY")
-api_secret = os.getenv("ZERODHA_API_SECRET")
-access_token_path = os.getenv("ZERODHA_ACCESS_TOKEN")
+api_key = st.secrets["ZERODHA_API_KEY"]
+api_secret = st.secrets["ZERODHA_API_SECRET"]
+access_token_path = st.secrets["ZERODHA_ACCESS_TOKEN"]
 temp_token_path = "temp_login_token.txt"
 
 st.set_page_config(page_title="Zerodha Login", layout="centered")

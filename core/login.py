@@ -5,11 +5,12 @@ import http.server
 import socketserver
 import urllib.parse
 from dotenv import load_dotenv
+import streamlit as st
 
 load_dotenv()
 os.makedirs("tokens", exist_ok=True)
-api_key = os.getenv("ZERODHA_API_KEY")
-api_secret = os.getenv("ZERODHA_API_SECRET")
+api_key = st.secrets["ZERODHA_API_KEY"]
+api_secret = st.secrets["ZERODHA_API_SECRET"]
 
 kite = KiteConnect(api_key=api_key)
 login_url = kite.login_url()

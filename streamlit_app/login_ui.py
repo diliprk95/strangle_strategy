@@ -10,8 +10,8 @@ import webbrowser
 
 load_dotenv()
 
-api_key = os.getenv("ZERODHA_API_KEY")
-api_secret = os.getenv("ZERODHA_API_SECRET")
+api_key = st.secrets["ZERODHA_API_KEY"]
+api_secret = st.secrets["ZERODHA_API_SECRET"]
 redirect_uri = "http://localhost:8000"
 
 kite = KiteConnect(api_key=api_key)

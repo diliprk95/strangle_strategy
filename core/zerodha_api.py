@@ -1,5 +1,6 @@
 import os
 import yaml
+import streamlit as st
 from kiteconnect import KiteConnect
 from datetime import date, timedelta
 
@@ -10,8 +11,8 @@ def load_config():
         return yaml.safe_load(f)
 
 config = load_config()
-api_key = os.getenv("ZERODHA_API_KEY")
-api_secret = os.getenv("ZERODHA_API_SECRET")
+api_key = st.secrets["ZERODHA_API_KEY"]
+api_secret = st.secrets["ZERODHA_API_SECRET"]
 access_token_path = os.getenv("ZERODHA_ACCESS_TOKEN")
 
 kite = KiteConnect(api_key=api_key)
