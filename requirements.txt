@@ -1,6 +1,6 @@
 streamlit
+streamlit-autorefresh
 kiteconnect
-PyYAML
-schedule
-python-dotenv
 apscheduler
+pyyaml
+python-dotenv
