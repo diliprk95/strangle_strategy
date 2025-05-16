@@ -1,24 +1,16 @@
-import os
+# pages/Zerodha_Login.py
 import streamlit as st
-import yaml
-from kiteconnect import KiteConnect
+import os
 import time
-import urllib.parse
-import webbrowser
+from kiteconnect import KiteConnect
 
-# --- LOCAL DEV REDIRECT SERVER (commented for cloud) ---
-# import threading
-# import http.server
-# import socketserver
-
+# --- SECRET HELPER ---
 def get_secret(key):
     try:
-        # Try Streamlit secrets (Cloud)
         return st.secrets[key]
     except Exception:
-        # Fallback to local .env or YAML config
         return os.getenv(key)
-    
+
 # --- CONFIG ---
 api_key = get_secret("ZERODHA_API_KEY")
 api_secret = get_secret("ZERODHA_API_SECRET")
@@ -28,7 +20,6 @@ st.set_page_config(page_title="Zerodha Login", layout="centered")
 st.title("🔐 Zerodha Kite Login")
 
 kite = KiteConnect(api_key=api_key)
-
 
 # --- TOKEN VALIDATION ---
 def is_token_valid():
@@ -43,35 +34,16 @@ def is_token_valid():
     except:
         return False
 
-
-# --- SESSION INIT ---
+# --- SESSION STATE ---
 if "is_logged_in" not in st.session_state:
     st.session_state.is_logged_in = is_token_valid()
 
+if "login_attempted" not in st.session_state:
+    st.session_state.login_attempted = False
 
-# --- STREAMLIT CLOUD FLOW ---
-query_params = st.query_params
-request_token = query_params.get("request_token")
-
-if request_token:
-    try:
-        data = kite.generate_session(request_token, api_secret=api_secret)
-        access_token = data["access_token"]
-
-        # Save access token
-        with open(access_token_path, "w") as f:
-            f.write(access_token)
-
-        st.session_state.is_logged_in = True
-        st.markdown("### ✅ Login successful!")
-        st.query_params  # Clear query params
-        st.page_link("pages/Strategy_Run.py", label="➡️ Go to Dashboard")
-    except Exception as e:
-        st.error(f"Token exchange failed: {e}")
-        st.stop()
-
-elif st.session_state.is_logged_in:
-    st.success("✅ Already authenticated.")
+# --- MAIN LOGIN LOGIC ---
+if st.session_state.is_logged_in:
+    st.success("✅ Logged in successfully.")
     st.page_link("pages/Strategy_Run.py", label="➡️ Go to Dashboard")
 
     if st.button("Logout"):
@@ -83,50 +55,28 @@ elif st.session_state.is_logged_in:
 else:
     st.warning("⚠️ You are not logged in to Zerodha.")
     login_url = kite.login_url()
-    is_local = os.getenv("IS_LOCAL", "0") == "1"
+    redirect_url = f"{login_url}&redirect_url=https://stranglestrategy.streamlit.app/pages/Redirect_Page"
 
-    if is_local:
-        if st.button("🔑 Login to Zerodha"):
-            st.markdown(f'<meta http-equiv="refresh" content="0;url={login_url}">', unsafe_allow_html=True)
-    else:   
-        st.warning("⚠️ Redirecting to Zerodha login...")
-        st.markdown(f'<meta http-equiv="refresh" content="0;url={login_url}">', unsafe_allow_html=True)
-        st.stop()        
+    st.link_button("🔑 Login to Zerodha (opens in new tab)", redirect_url)
 
-    # --- LOCALHOST REDIRECT FLOW (FOR LOCAL DEV ONLY) ---
-    # """
-    # To use local redirect server, uncomment this section and run locally:
+    if st.button("Start Login Check"):
+        st.session_state.login_attempted = True
+        st.rerun()
 
-    # # import webbrowser
-    # # import threading
+    if st.session_state.login_attempted:
+        st.info("Waiting for login to complete in new tab...")
 
-    # def start_redirect_server():
-    #     class TokenHandler(http.server.SimpleHTTPRequestHandler):
-    #         def do_GET(self):
-    #             parsed = urllib.parse.urlparse(self.path)
-    #             params = urllib.parse.parse_qs(parsed.query)
-    #             if "request_token" in params:
-    #                 try:
-    #                     data = kite.generate_session(params["request_token"][0], api_secret=api_secret)
-    #                     access_token = data["access_token"]
-    #                     with open(access_token_path, "w") as f:
-    #                         f.write(access_token)
-    #                     self.send_response(200)
-    #                     self.end_headers()
-    #                     self.wfile.write(b"<h2>✅ Login successful. You can close this tab.</h2>")
-    #                 except Exception as e:
-    #                     self.send_error(500, f"Token exchange failed: {e}")
-    #             else:
-    #                 self.send_error(400, "Missing request_token")
-
-    #     PORT = 8000
-    #     with socketserver.TCPServer(("", PORT), TokenHandler) as httpd:
-    #         httpd.handle_request()
-
-    # # For local development:
-    # if st.button("🔑 Login Locally"):
-    #     webbrowser.open_new_tab(kite.login_url())
-    #     threading.Thread(target=start_redirect_server, daemon=True).start()
-    #     st.info("Opened browser tab. Waiting for token...")
-    # """
-
+        countdown_placeholder = st.empty()
+        with st.spinner("⏳ Checking login status..."):
+            for i in reversed(range(30)):
+                countdown_placeholder.info(f"⏳ Checking again in {i} seconds...")
+                time.sleep(1)
+                if is_token_valid():
+                    st.session_state.is_logged_in = True
+                    st.rerun()
+        
+        countdown_placeholder.warning("❌ Login not detected.")
+        st.session_state.login_attempted = False
+        if st.button("🔁 Retry"):
+            st.session_state.login_attempted = True
+            st.rerun()
