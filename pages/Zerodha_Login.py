@@ -63,8 +63,7 @@ if request_token:
             f.write(access_token)
 
         st.session_state.is_logged_in = True
-        st.markdown("### ✅ Login successful! You can close this tab.")
-        st.stop()
+        st.markdown("### ✅ Login successful!")
         st.query_params  # Clear query params
         st.page_link("pages/Strategy_Run.py", label="➡️ Go to Dashboard")
     except Exception as e:
@@ -88,11 +87,13 @@ else:
 
     if is_local:
         if st.button("🔑 Login to Zerodha"):
-            webbrowser.open_new_tab(login_url)
-            st.info("Opened Zerodha login page in a new tab. You'll be redirected back here with access.")
-    else:
-        st.link_button("🔑 Login to Zerodha", login_url)
-        st.info("You'll be redirected back here with access.")
+            st.markdown(f'<meta http-equiv="refresh" content="0;url={login_url}">', unsafe_allow_html=True)
+    else:   
+        st.markdown(f"""
+            <a href="{login_url}" target="_blank">
+                <button style="font-size:16px;padding:8px 16px;">🔑 Login to Zerodha</button>
+            </a>
+        """, unsafe_allow_html=True)
 
     # --- LOCALHOST REDIRECT FLOW (FOR LOCAL DEV ONLY) ---
     # """
