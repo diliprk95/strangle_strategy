@@ -53,7 +53,7 @@ if "is_logged_in" not in st.session_state:
 query_params = st.query_params
 request_token = query_params.get("request_token")
 
-if request_token and "callback" in query_params:
+if request_token:
     try:
         data = kite.generate_session(request_token, api_secret=api_secret)
         access_token = data["access_token"]
@@ -90,11 +90,11 @@ else:
         if st.button("🔑 Login to Zerodha"):
             webbrowser.open_new_tab(login_url)
             st.info("Opened Zerodha login page in a new tab. You'll be redirected back here with access.")
-    else:
-       login_url = kite.login_url()
-       login_url_with_callback = login_url + "&callback=1"
-       st.link_button("🔑 Login to Zerodha", login_url_with_callback)
-       st.info("You'll be redirected back here with access.")
+        else:
+            st.warning("⚠️ You are not logged in to Zerodha.")
+            login_url = kite.login_url()
+            st.link_button("🔑 Login to Zerodha", login_url)
+            st.info("You'll be redirected back here with access.")
 
     # --- LOCALHOST REDIRECT FLOW (FOR LOCAL DEV ONLY) ---
     # """
