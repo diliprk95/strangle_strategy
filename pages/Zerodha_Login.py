@@ -89,11 +89,9 @@ else:
         if st.button("🔑 Login to Zerodha"):
             st.markdown(f'<meta http-equiv="refresh" content="0;url={login_url}">', unsafe_allow_html=True)
     else:   
-        st.markdown(f"""
-            <a href="{login_url}" target="_blank">
-                <button style="font-size:16px;padding:8px 16px;">🔑 Login to Zerodha</button>
-            </a>
-        """, unsafe_allow_html=True)
+        st.warning("⚠️ Redirecting to Zerodha login...")
+        st.markdown(f'<meta http-equiv="refresh" content="0;url={login_url}">', unsafe_allow_html=True)
+        st.stop()        
 
     # --- LOCALHOST REDIRECT FLOW (FOR LOCAL DEV ONLY) ---
     # """
