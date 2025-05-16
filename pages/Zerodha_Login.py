@@ -20,8 +20,7 @@ api_secret = get_secret("ZERODHA_API_SECRET")
 access_token_path = get_secret("ZERODHA_ACCESS_TOKEN") or "access_token.txt"
 
 # Determine environment
-hostname = socket.gethostname()
-is_local = "localhost" in st.request.url or "127.0.0.1" in st.request.url
+is_local = os.environ.get("STREAMLIT_SERVER_PORT") == "8501"
 
 st.set_page_config(page_title="Zerodha Login", layout="centered")
 st.title("🔐 Zerodha Kite Login")
