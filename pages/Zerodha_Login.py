@@ -4,80 +4,85 @@ import yaml
 import time
 from kiteconnect import KiteConnect
 
-# Load config
+# --- Load config ---
 with open("config/settings.yaml", "r") as f:
     config = yaml.safe_load(f)
 
 def get_secret(key):
     try:
-        # Try Streamlit secrets (Cloud)
         return st.secrets[key]
     except Exception:
-        # Fallback to local .env or YAML config
         return os.getenv(key)
 
 api_key = get_secret("ZERODHA_API_KEY")
 api_secret = get_secret("ZERODHA_API_SECRET")
-access_token_path =  get_secret("ZERODHA_ACCESS_TOKEN")
+access_token_path = get_secret("ZERODHA_ACCESS_TOKEN") or "access_token.txt"
 
 kite = KiteConnect(api_key=api_key)
 
-# Set page UI
-st.set_page_config(page_title="Zerodha Login")
+# --- Page Setup ---
+st.set_page_config(page_title="Zerodha Login", layout="centered")
 st.title("🔐 Zerodha Kite Login")
 
-# Query param handling
-params = st.query_params
-request_token = params.get("request_token")
-
-# SESSION INIT
+# --- Session State Init ---
 if "zerodha_logged_in" not in st.session_state:
     st.session_state["zerodha_logged_in"] = False
 
-# CHECK if token already exists
+# --- Helper Functions ---
 def is_token_valid():
     if not os.path.exists(access_token_path):
         return False
+    with open(access_token_path, "r") as f:
+        token = f.read().strip()
     try:
-        with open(access_token_path, "r") as f:
-            token = f.read().strip()
         kite.set_access_token(token)
         kite.profile()
         return True
-    except:
+    except Exception:
         return False
 
-# If already logged in
-if st.session_state["zerodha_logged_in"] or is_token_valid():
-    st.success("✅ You are already logged in to Zerodha.")
+def mark_logged_in(token: str):
+    with open("auth_token.txt", "w") as f:
+        f.write(token)
+
+def is_logged_in():
+    return os.path.exists("auth_token.txt")
+
+# --- Main Logic ---
+params = st.query_params
+request_token = params.get("request_token")
+
+# 1. Already Logged In
+if is_logged_in() and is_token_valid():
+    st.success("✅ Zerodha authenticated.")
     st.page_link("pages/Strategy_Run.py", label="➡️ Go to Dashboard")
 
-    if st.button("🔓 Logout"):
-        st.session_state["zerodha_logged_in"] = False
-        if os.path.exists(access_token_path):
-            os.remove(access_token_path)
-        st.success("✅ Logged out successfully. Refreshing...")
-        time.sleep(1)
-        st.rerun()
+    if st.button("Logout"):
+        for path in ["auth_token.txt", access_token_path]:
+            if os.path.exists(path):
+                os.remove(path)
+        st.success("🔓 Logged out successfully. Please refresh.")
 
-# Handle callback from Zerodha (i.e., user just logged in)
+# 2. Handle Callback from Zerodha
 elif request_token:
     try:
         data = kite.generate_session(request_token, api_secret=api_secret)
         access_token = data["access_token"]
+
         with open(access_token_path, "w") as f:
             f.write(access_token)
 
-        st.session_state["zerodha_logged_in"] = True
+        mark_logged_in(access_token)
         st.success("✅ Login successful! Redirecting to dashboard...")
-        st.st.query_params  # Clear URL params
+
+        st.query_params.clear()
         time.sleep(2)
         st.switch_page("pages/Strategy_Run.py")
 
     except Exception as e:
         st.error(f"❌ Login failed: {str(e)}")
 
-# Show login button if not logged in
+# 3. Not Logged In Yet
 else:
     login_url = kite.login_url()
     st.markdown(
@@ -90,3 +95,4 @@ else:
         """,
         unsafe_allow_html=True,
     )
+    st.info("A new tab will open. Login there and come back here.")

@@ -2,6 +2,13 @@ import sys
 import os
 import streamlit as st
 
+def is_logged_in():
+    return os.path.exists("auth_token.txt")
+
+if not is_logged_in():
+    st.warning("Please login via Zerodha first.")
+    st.stop()
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 from core.zerodha_api import get_kite_client, is_token_valid, get_ltp, get_next_week_expiry
 from core.strategy_runner import run_strategy
@@ -9,10 +16,6 @@ from streamlit_autorefresh import st_autorefresh
 
 st.set_page_config(page_title="Strategy Trigger", layout="wide")
 st.title("📈 Run Strangle Strategy")
-
-if "is_logged_in" not in st.session_state or not st.session_state.is_logged_in:
-    st.warning("Please login via Zerodha first.")
-    st.stop()
 
 trigger = run_strategy()
 st_autorefresh(interval=300000, key="strategy_refresh")  # every 5 minutes
