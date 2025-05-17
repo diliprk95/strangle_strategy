@@ -1,36 +1,44 @@
-import os
-import socket
-import yaml
 import streamlit as st
+import os
+import yaml
+import time
 from kiteconnect import KiteConnect
-from urllib.parse import urlencode
 
-# Load config values
+# Load config
 with open("config/settings.yaml", "r") as f:
     config = yaml.safe_load(f)
 
 def get_secret(key):
     try:
+        # Try Streamlit secrets (Cloud)
         return st.secrets[key]
     except Exception:
-        return os.getenv(key) or config.get(key)
+        # Fallback to local .env or YAML config
+        return os.getenv(key)
 
 api_key = get_secret("ZERODHA_API_KEY")
 api_secret = get_secret("ZERODHA_API_SECRET")
-access_token_path = get_secret("ZERODHA_ACCESS_TOKEN") or "access_token.txt"
-
-# Determine environment
-is_local = os.environ.get("STREAMLIT_SERVER_PORT") == "8501"
-
-st.set_page_config(page_title="Zerodha Login", layout="centered")
-st.title("🔐 Zerodha Kite Login")
+access_token_path =  get_secret("ZERODHA_ACCESS_TOKEN")
 
 kite = KiteConnect(api_key=api_key)
 
+# Set page UI
+st.set_page_config(page_title="Zerodha Login")
+st.title("🔐 Zerodha Kite Login")
+
+# Query param handling
+params = st.query_params
+request_token = params.get("request_token")
+
+# SESSION INIT
+if "zerodha_logged_in" not in st.session_state:
+    st.session_state["zerodha_logged_in"] = False
+
+# CHECK if token already exists
 def is_token_valid():
+    if not os.path.exists(access_token_path):
+        return False
     try:
-        if not os.path.exists(access_token_path):
-            return False
         with open(access_token_path, "r") as f:
             token = f.read().strip()
         kite.set_access_token(token)
@@ -39,45 +47,46 @@ def is_token_valid():
     except:
         return False
 
-if "is_logged_in" not in st.session_state:
-    st.session_state.is_logged_in = is_token_valid()
+# If already logged in
+if st.session_state["zerodha_logged_in"] or is_token_valid():
+    st.success("✅ You are already logged in to Zerodha.")
+    st.page_link("pages/Strategy_Run.py", label="➡️ Go to Dashboard")
 
-# Detect request_token from query (Streamlit Cloud)
-query_params = st.query_params
-if "request_token" in query_params:
-    request_token = query_params["request_token"]
+    if st.button("🔓 Logout"):
+        st.session_state["zerodha_logged_in"] = False
+        if os.path.exists(access_token_path):
+            os.remove(access_token_path)
+        st.success("✅ Logged out successfully. Refreshing...")
+        time.sleep(1)
+        st.rerun()
+
+# Handle callback from Zerodha (i.e., user just logged in)
+elif request_token:
     try:
         data = kite.generate_session(request_token, api_secret=api_secret)
         access_token = data["access_token"]
         with open(access_token_path, "w") as f:
             f.write(access_token)
-        st.session_state.is_logged_in = True
-        st.success("✅ Login successful!")
-        st.page_link("pages/Strategy_Run.py", label="➡️ Go to Dashboard")
-        st.stop()
+
+        st.session_state["zerodha_logged_in"] = True
+        st.success("✅ Login successful! Redirecting to dashboard...")
+        st.st.query_params  # Clear URL params
+        time.sleep(2)
+        st.switch_page("pages/Strategy_Run.py")
+
     except Exception as e:
-        st.error(f"❌ Token exchange failed: {str(e)}")
+        st.error(f"❌ Login failed: {str(e)}")
 
-# MAIN UI
-if st.session_state.is_logged_in:
-    st.success("✅ You are logged in to Zerodha.")
-    st.page_link("pages/Strategy_Run.py", label="➡️ Go to Dashboard")
-    if st.button("Logout"):
-        st.session_state.is_logged_in = False
-        if os.path.exists(access_token_path):
-            os.remove(access_token_path)
-        st.rerun()
+# Show login button if not logged in
 else:
-    st.warning("⚠️ You are not logged in.")
-
-    # Determine login URL
-    if is_local:
-        # Local dev environment
-        redirect_uri = "http://localhost:8000"
-    else:
-        # Deployed Streamlit app
-        redirect_uri = "https://stranglestrategy.streamlit.app/Zerodha_Login"
-
-    # Override redirect URI
-    login_url = kite.login_url() + f"&redirect_uri={redirect_uri}"
-    st.markdown(f"[🔑 Click here to login to Zerodha]({login_url})", unsafe_allow_html=True)
+    login_url = kite.login_url()
+    st.markdown(
+        f"""
+        <a href="{login_url}" target="_blank">
+            <button style="padding: 0.6em 1.2em; font-size: 1rem; border-radius: 6px; background-color: #009688; color: white; border: none; cursor: pointer;">
+                🔐 Login to Zerodha
+            </button>
+        </a>
+        """,
+        unsafe_allow_html=True,
+    )
